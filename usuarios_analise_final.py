@@ -242,13 +242,23 @@ tk.Checkbutton(frame_filtros_licencas, text="Standard", variable=var_standard, c
 tk.Checkbutton(frame_filtros_licencas, text="Exchange", variable=var_exchange, command=atualizar_licenciados).pack(side=tk.LEFT)
 tk.Checkbutton(frame_filtros_licencas, text="Power BI", variable=var_powerbi, command=atualizar_licenciados).pack(side=tk.LEFT)
 
+frame_tabela_licenciados = tk.Frame(aba_licenciados)
+frame_tabela_licenciados.pack(fill=tk.BOTH, expand=True)
+
+scrollbar_y = tk.Scrollbar(frame_tabela_licenciados, orient=tk.VERTICAL)
+scrollbar_x = tk.Scrollbar(frame_tabela_licenciados, orient=tk.HORIZONTAL)
+
 colunas_licenciados = ('Nome para exibição', 'Nome UPN', 'Licenças', 'Bloquear credencial')
-tree_licenciados = ttk.Treeview(aba_licenciados, columns=colunas_licenciados, show='headings')
-for col in colunas_licenciados:
-    tree_licenciados.heading(col, text=col)
-    tree_licenciados.column(col, width=150)
-tree_licenciados.tag_configure('inativo', background='red')
+tree_licenciados = ttk.Treeview(
+    frame_tabela_licenciados, columns=colunas_licenciados, show='headings',
+    yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
+scrollbar_y.config(command=tree_licenciados.yview)
+scrollbar_x.config(command=tree_licenciados.xview)
+scrollbar_y.pack(side=tk.RIGHT, fill=tk.Y)
+scrollbar_x.pack(side=tk.BOTTOM, fill=tk.X)
 tree_licenciados.pack(fill=tk.BOTH, expand=True)
+
+tree_licenciados.tag_configure('inativo', background='red')
 
 frame_botoes_exportar = tk.Frame(aba_licenciados)
 frame_botoes_exportar.pack(pady=10)

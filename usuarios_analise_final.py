@@ -15,6 +15,8 @@ def carregar_csv():
         atualizar_tabela(df)
         atualizar_resumo(df)
         atualizar_licenciados()
+        atualizar_uso_licenca()
+
         
 def exportar_csv():
     if not df_filtrado.empty:
@@ -164,7 +166,34 @@ def atualizar_licenciados():
         # Adiciona no DataFrame para exportação
         df_filtrado.loc[len(df_filtrado)] = [row['Nome para exibição'], row['Nome UPN'], licencas_exibidas, row['Bloquear credencial']]
 
+def atualizar_uso_licenca():
+    for row in tree_uso_licenca.get_children():
+        tree_uso_licenca.delete(row)
 
+    if df is None:
+        return
+
+    empresas = ['autonomoz', 'bellavia', 'rhyno', 'hbko']
+    licencas = {
+        'Basic': 'Microsoft 365 Business Basic',
+        'Standard': 'Microsoft 365 Business Standard',
+        'Exchange': 'Exchange Online (Plan 2)',
+        'Power BI': 'Power BI Pro'
+    }
+
+    for empresa in empresas:
+        df_empresa = df[df['Nome UPN'].str.contains(empresa, case=False, na=False)]
+        contagens = []
+        for licenca_nome in licencas.values():
+            quantidade = df_empresa['Licenças'].str.contains(licenca_nome, case=False, na=False).sum()
+            contagens.append(quantidade)
+        tree_uso_licenca.insert("", tk.END, values=(
+            empresa.capitalize(),
+            contagens[0],
+            contagens[1],
+            contagens[2],
+            contagens[3]
+        ))
 
 
 
@@ -268,5 +297,18 @@ btn_exportar_csv.pack(side=tk.LEFT, padx=5)
 
 btn_exportar_pdf = tk.Button(frame_botoes_exportar, text="Exportar PDF", command=exportar_pdf)
 btn_exportar_pdf.pack(side=tk.LEFT, padx=5)
+
+# Aba Uso de Licença por Empresa
+aba_uso_licenca = tk.Frame(notebook)
+notebook.add(aba_uso_licenca, text="Uso de Licença por Empresa")
+
+tk.Label(aba_uso_licenca, text="Uso de Licença por Empresa").pack()
+
+colunas_uso_licenca = ('Empresa', 'Basic', 'Standard', 'Exchange', 'Power BI')
+tree_uso_licenca = ttk.Treeview(aba_uso_licenca, columns=colunas_uso_licenca, show='headings')
+for col in colunas_uso_licenca:
+    tree_uso_licenca.heading(col, text=col)
+    tree_uso_licenca.column(col, width=120)
+tree_uso_licenca.pack(fill=tk.BOTH, expand=True)
 
 root.mainloop()
